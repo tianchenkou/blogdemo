@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.koutian.mapper.CmtMapper">
+    <resultMap type="Reply" id="ReplyResult">
+        <id column="rid" property="id"/>
+        <result column="comment_id" property="commentId"/>
+        <result column="fuid2" property="fromId"/>
+        <result column="fusername2" property="fromName"/>
+        <result column="favatar2" property="fromAvatar"/>
+        <result column="tuid1" property="toId"/>
+        <result column="tusername1" property="toName"/>
+        <result column="tavatar1" property="toAvatar"/>
+        <result column="rcontent" property="content"/>
+        <result column="rcreated_at" property="createdTime"/>
+    </resultMap>
+
+    <resultMap type="Comment" id="CommentResult">
+        <id column="cid" property="id"/>
+        <result column="article_id" property="articleId"/>
+        <result column="fuid1" property="fromId"/>
+        <result column="fusername1" property="fromName"/>
+        <result column="favatar1" property="fromAvatar"/>
+        <result column="like_num" property="likeNum"/>
+        <result column="ccontent" property="content"/>
+        <result column="ccreated_at" property="createdTime"/>
+        <collection property="replys" resultMap="ReplyResult"/>
+    </resultMap>
+
+    <!--根据id查找一条评论的所有信息，包括它的所有子评论-->
+    <select id="findCommentById" parameterType="int"
+            resultMap="CommentResult">
+        select
+        c.id as cid, article_id, fu1.id as fuid1, fu1.avatar as favatar1, fu1.username as fusername1, like_num,
+        c.content as ccontent,c.created_at as ccreated_at,
+
+        r.id as rid, comment_id, fu2.id as fuid2, fu2.avatar as favatar2, fu2.username as fusername2,
+        tu.id as tuid1, tu.avatar as tavatar1, tu.username as tusername1,
+        r.content as rcontent,r.created_at as rcreated_at
+        from
+				b_comment as c LEFT JOIN b_reply as r on c.id = comment_id
+											 LEFT JOIN b_user tu on tu.id=r.to_id
+											 LEFT JOIN b_user as fu1 on fu1.id=c.from_id
+											 LEFT JOIN b_user as fu2 on fu2.id=r.from_id
+			  WHERE c.id=#{id}
+    </select>
+
+    <!--根据id查找一条评论的所有信息，包括它的所有子评论-->
+    <select id="findAllCommentsByAid" parameterType="int"
+            resultMap="CommentResult">
+        select
+        c.id as cid, article_id, fu1.id as fuid1, fu1.avatar as favatar1, fu1.username as fusername1, like_num,
+        c.content as ccontent,c.created_at as ccreated_at,
+
+        r.id as rid, comment_id, fu2.id as fuid2, fu2.avatar as favatar2, fu2.username as fusername2,
+        tu.id as tuid1, tu.avatar as tavatar1, tu.username as tusername1,
+        r.content as rcontent,r.created_at as rcreated_at
+        from
+				b_comment as c LEFT JOIN b_reply as r on c.id = comment_id
+											 LEFT JOIN b_user tu on tu.id=r.to_id
+											 LEFT JOIN b_user as fu1 on fu1.id=c.from_id
+											 LEFT JOIN b_user as fu2 on fu2.id=r.from_id
+			  WHERE c.article_id=#{id} ORDER BY c.created_at desc
+    </select>
+
+    <!--查找具体的子评论根据id-->
+    <select id="findReplyById" parameterType="int" resultMap="ReplyResult">
+        select
+        r.id as rid, comment_id, fu2.id as fuid2, fu2.avatar as favatar2, fu2.username as fusername2,
+        tu.id as tuid1, tu.avatar as tavatar1, tu.username as tusername1,
+        r.content as rcontent,r.created_at as rcreated_at
+        from
+				b_reply as r LEFT JOIN b_user tu on tu.id=r.to_id
+										 LEFT JOIN b_user as fu2 on fu2.id=r.from_id
+			  WHERE r.id=#{id}
+    </select>
+
+    <!--向数据库插入一条回复-->
+    <insert id="insertReply" useGeneratedKeys="true" keyProperty="id" parameterType="Reply">
+        INSERT INTO
+        b_reply(comment_id,from_id,content,created_at,to_id)
+        VALUES(#{commentId},#{fromId},#{content},#{createdTime},#{toId})
+    </insert>
+
+    <!--向数据库插入一条评论-->
+    <insert id="insertCmt" useGeneratedKeys="true" keyProperty="id" parameterType="Comment" >
+        INSERT INTO
+        b_comment(article_id,from_id,like_num,content,created_at)
+        VALUES(#{articleId},#{fromId},#{likeNum},#{content},#{createdTime})
+    </insert>
+
+    <!--删除评论，根据具体id-->
+    <delete id="deleteCmtById" parameterType="int">
+        delete from b_comment where id=#{id}
+    </delete>
+
+    <!--删除评论，根据具体id-->
+    <delete id="deleteRpyById" parameterType="int">
+        delete from b_reply where id=#{id}
+    </delete>
+
+    <!--根据用户id查询所有评论,不带子评论-->
+    <select id="findAllCmtByUid" parameterType="int" resultMap="CommentResult">
+       select
+        c.id as cid, article_id, fu1.id as fuid1, fu1.avatar as favatar1, fu1.username as fusername1, like_num,
+        c.content as ccontent,c.created_at as ccreated_at
+        from
+				b_comment as c
+												LEFT JOIN b_user as fu1 on fu1.id=c.from_id
+			  WHERE c.from_id=#{uid}
+    </select>
+
+    <!--根据用户id查询所有回复-->
+    <select id="findAllRpyByUid" parameterType="int" resultType="Reply">
+        select
+        r.id as rid, comment_id, fu2.id as fuid2, fu2.avatar as favatar2, fu2.username as fusername2,
+        tu.id as tuid1, tu.avatar as tavatar1, tu.username as tusername1,
+        r.content as rcontent,r.created_at as rcreated_at
+        from
+					b_reply as r
+												LEFT JOIN b_user tu on tu.id=r.to_id
+												LEFT JOIN b_user as fu2 on fu2.id=r.from_id
+			  WHERE r.from_id=#{uid}
+    </select>
+
+
+
+
+</mapper>

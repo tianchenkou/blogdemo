@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    username: root
+    password: wz163422
+    url: jdbc:mysql://47.96.136.148:3307/myBlog?useUnicode=true&amp&useSSL=false&amp&characterEncoding=UTF-8&amp&serverTimezone=GMT%2B8
+    type: com.alibaba.druid.pool.DruidDataSource
+
+    initialSize: 5
+    minIdle: 5
+    maxActive: 20
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    #   配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+    #    filters: stat,wall,log4j
+    maxPoolPreparedStatementPerConnectionSize: 20
+    useGlobalDataSourceStat: true
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+#    2.x配置自动导入sql文件
+#    initialization-mode: always
+#    schema:
+#      - classpath:sql/department.sql
+#      - classpath:sql/employee.sql
+  redis:
+    host: 47.96.136.148
+    timeout: 5000
+    database: 2
+    port: 6379
+server:
+  port: 8181
+mybatis:
+  config-location: classpath:mybatis/mybatis-config.xml
+  mapper-locations: classpath:mybatis/mapper/*.xml
+logging:
+  path: /devLog/SpringBoot/
+  pattern:
+    console: logging.pattern.console=%d{yyyy-MM-dd} [%thread] %-5level %logger{50} - %msg%n
+    file: logging.pattern.file=%d{yyyy-MM-dd hh:mm:ss}  [%thread] %-5level %logger{50} - %msg%n
+    level: logging.level.com.koutian=debug

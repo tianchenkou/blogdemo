@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.koutian.mapper.CateMapper">
+
+    <resultMap type="CategoryDetails" id="CategoryDetailsResult">
+        <id column="cdid" property="id"/>
+        <result column="cdname" property="name"/>
+    </resultMap>
+
+    <resultMap type="Category" id="CategoryResult">
+        <id column="cid" property="id"/>
+        <result column="cname" property="name"/>
+        <collection property="sonCate" resultMap="CategoryDetailsResult"/>
+    </resultMap>
+
+    <!-- 根据一级目录id查询其下所有的二级目录 -->
+    <select id="findCateById" parameterType="int"
+            resultMap="CategoryResult">
+        select
+        c.id as cid, c.name as cname,
+        cd.id as cdid, cd.name as cdname
+        from
+        b_cate as c
+        left outer join b_cate_detail as cd on c.id = cd.category_id
+        where
+        c.id=#{id}
+    </select>
+
+    <!-- 查询所有的目录 -->
+    <select id="findAllCate" resultMap="CategoryResult">
+        select
+        c.id as cid, c.name as cname,
+        cd.id as cdid, cd.name as cdname
+        from
+        b_cate as c
+        left outer join b_cate_detail as cd on c.id = cd.category_id
+    </select>
+
+    <!-- 一次插入多条数据，可以通过CategoryDetails中的parent属性指定其对一关系的id
+         其好处是可以在不知道其 外键值 的情况下 自动插入外键
+         前提是指定parent属性，parent对象id可以为null，但是必须在其之前插入数据库，并且是同一个对象
+         这是mybatis帮我们做的
+     -->
+    <insert id="insertCategoryDetails" useGeneratedKeys="true" keyProperty="id" parameterType="CategoryDetails">
+        INSERT INTO
+        b_cate_detail(NAME,CATEGORY_ID)
+        VALUES(#{name},#{parent.id})
+    </insert>
+
+    <insert id="insertCategoryDetail" useGeneratedKeys="true" keyProperty="id" parameterType="CategoryDetails">
+        INSERT INTO
+        b_cate_detail(NAME,CATEGORY_ID)
+        VALUES(#{name},#{parentId})
+    </insert>
+
+
+    <insert id="insertCate" useGeneratedKeys="true" keyProperty="id" parameterType="Category">
+        INSERT INTO
+        b_cate(NAME)
+        VALUES(#{name})
+    </insert>
+
+</mapper>

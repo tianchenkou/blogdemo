@@ -30,4 +30,11 @@ public class UserService {
     public User findUserById(String userId) {
         return userMapper.findUserById(Integer.valueOf(userId));
     }
+
+    public void setAvatarByUid(Integer uid, String url) {
+        User user = new User();
+        user.setUid(uid.toString());
+        user.setAvatar(url);
+        userMapper.updateUser(user);
+    }
 }

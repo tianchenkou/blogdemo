@@ -13,4 +13,6 @@ public interface UserMapper {
      * @return
      */
     User findUserByName(Map map);
+
+    void updateUser(User user);
 }

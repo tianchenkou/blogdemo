@@ -1,7 +1,7 @@
 spring:
   datasource:
     username: root
-    password: wz163422
+    password: root
     url: jdbc:mysql://47.96.136.148:3307/myBlog?useUnicode=true&amp&useSSL=false&amp&characterEncoding=UTF-8&amp&serverTimezone=GMT%2B8
     type: com.alibaba.druid.pool.DruidDataSource
 
